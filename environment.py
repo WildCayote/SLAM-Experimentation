@@ -36,7 +36,7 @@ class RobotEnvironment:
     @staticmethod
     def LIDAR_to_points(distance:float, angle:float, LIDAR_pos:Tuple[float, float]):
         x = int(LIDAR_pos[0] + math.cos(angle) * distance)
-        y = int(LIDAR_pos[1] - math.sin(angle) * distance)
+        y = int(LIDAR_pos[1] + math.sin(angle) * distance)
 
         return (x, y)
 
@@ -54,10 +54,7 @@ class RobotEnvironment:
 
         # loop through the point cloud
         for point in self.point_cloud:
-            self.information_map.set_at(
-                x_y=(int(point[0]), int(point[1])),
-                color=self.RED
-            )
+            self.information_map.set_at((int(point[0]), int(point[1])), self.RED)
 
 if __name__ == '__main__':
     # create a world
