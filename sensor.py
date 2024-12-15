@@ -48,11 +48,11 @@ class LIDAR:
         x1, y1 = self.position
 
         # rotate once and obtain 60 samples, from 0Deg (0rad) to 360Deg (2πrad)
-        for angle in np.linspace(0, 2 * math.pi, 100, False):
+        for angle in np.linspace(0, 2 * math.pi, self.rotation_speed, False):
             # define the endpoint of the line along the selected angle, the length of the line is going to be equal to the range of the LIDAR
             x2 = math.cos(angle) * self.range + x1
-            y2 = math.sin(angle) * self.range + y1 # the reason it is set to -y1 is because pygame has its origin at the top left corner, hence the positive y axis goes downwards
-
+            y2 = math.sin(angle) * self.range + y1
+            
             # create another loop that will sample points along the line and check for object
             samples = 100
             for i in range(0, samples):

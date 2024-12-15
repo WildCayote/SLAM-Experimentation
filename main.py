@@ -15,7 +15,7 @@ original_map = world.map.copy()
 
 # initialize the LIDAR
 sensor = LIDAR(
-    rotation_speed=1,
+    rotation_speed=100,
     detection_range=90,
     map=original_map,
     error=(0.5, 0.01)
