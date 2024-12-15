@@ -1,5 +1,5 @@
 from typing import Tuple
-import pygame
+import pygame, math
 
 class RobotEnvironment:
     def __init__(self, dimensions:Tuple[int, int], world_path:str, world_name:str = 'SLAM Simulation'):
@@ -29,6 +29,13 @@ class RobotEnvironment:
 
         # overlay the map of the world on to the window
         self.map.blit(self.world_map, (0,0))
+    
+    @staticmethod
+    def LIDAR_to_points(distance:float, angle:float, LIDAR_pos:Tuple[float, float]):
+        x = int(LIDAR_pos[0] + math.cos(angle) * distance)
+        y = int(LIDAR_pos[1] - math.sin(angle) * distance)
+
+        return (x, y)
 
 
 
