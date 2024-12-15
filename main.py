@@ -5,7 +5,7 @@ from environment import RobotEnvironment
 
 # create a world
 world = RobotEnvironment(
-    dimensions=(700, 1400),
+    dimensions=(800, 900),
     world_path='./maps/map-1.png'
 )
 
