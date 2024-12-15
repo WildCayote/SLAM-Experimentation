@@ -19,6 +19,7 @@ class RobotEnvironment:
         
         # load the provided map
         self.world_map = pygame.image.load(world_path)
+        self.world_map = pygame.transform.scale(surface=self.world_map, size=(self.map_width, self.map_height))
         
         # display the window name
         pygame.display.set_caption(self.world_name)
