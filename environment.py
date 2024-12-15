@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 import pygame, math
 
 class RobotEnvironment:
@@ -15,6 +15,9 @@ class RobotEnvironment:
         self.GREEN = (0, 255, 0)
         self.BLUE = (0, 0, 255)
 
+        # declare a list for hodling the point cloud detected by the LIDAR
+        self.point_cloud = []
+
         pygame.init()
         
         # load the provided map
@@ -29,7 +32,7 @@ class RobotEnvironment:
 
         # overlay the map of the world on to the window
         self.map.blit(self.world_map, (0,0))
-    
+        
     @staticmethod
     def LIDAR_to_points(distance:float, angle:float, LIDAR_pos:Tuple[float, float]):
         x = int(LIDAR_pos[0] + math.cos(angle) * distance)
@@ -37,6 +40,13 @@ class RobotEnvironment:
 
         return (x, y)
 
+    def save_reading(self, readings:List):
+        for reading in readings:
+            # convert the LIDAR reading into cartesian point data
+            point = RobotEnvironment.LIDAR_to_points(reading[0], reading[1], reading[2])
+
+            # check if the point is already stored, if not add it to the store
+            if point not in self.point_cloud: self.point_cloud.append(point)
 
 
 if __name__ == '__main__':
