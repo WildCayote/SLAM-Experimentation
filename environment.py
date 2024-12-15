@@ -48,6 +48,16 @@ class RobotEnvironment:
             # check if the point is already stored, if not add it to the store
             if point not in self.point_cloud: self.point_cloud.append(point)
 
+    def show_reading(self):
+        # copy the real map
+        self.information_map = self.map.copy()
+
+        # loop through the point cloud
+        for point in self.point_cloud:
+            self.information_map.set_at(
+                x_y=(int(point[0]), int(point[1])),
+                color=self.RED
+            )
 
 if __name__ == '__main__':
     # create a world
