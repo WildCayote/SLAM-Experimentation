@@ -41,7 +41,7 @@ class LIDAR:
         new_distance = max(new_distance, 0)
         new_angle = max(new_angle, 0)
 
-        return [distance, angle]
+        return [new_distance, new_angle]
 
     def detect_obstacles(self):
         data = []
@@ -52,7 +52,7 @@ class LIDAR:
             # define the endpoint of the line along the selected angle, the length of the line is going to be equal to the range of the LIDAR
             x2 = math.cos(angle) * self.range + x1
             y2 = math.sin(angle) * self.range + y1
-            
+
             # create another loop that will sample points along the line and check for object
             samples = 100
             for i in range(0, samples):
