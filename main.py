@@ -15,7 +15,7 @@ original_map = world.map.copy()
 
 # initialize the LIDAR
 sensor = LIDAR(
-    rotation_speed=100,
+    rotation_speed=300,
     detection_range=90,
     map=original_map,
     error=(0.5, 0.01)
@@ -61,7 +61,7 @@ while running:
 
             # plot the readings
             world.show_reading()
-            
+
             # Draw the information map on top of the original map
             world.map.blit(world.information_map, (0, 0))
         pygame.display.update()
