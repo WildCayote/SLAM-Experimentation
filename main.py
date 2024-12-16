@@ -21,9 +21,6 @@ sensor = LIDAR(
     error=(0.5, 0.01)
 )
 
-# fill the original map with black
-world.map.fill(color=world.BLACK)
-
 # copy the newly created map, the one filled with black, as the information map
 world.information_map = world.map.copy()
 
@@ -31,6 +28,9 @@ world.information_map = world.map.copy()
 running = True
 
 while running:
+    # fill the original map with black
+    world.map.fill(color=world.BLACK)
+
     # poll for event
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
@@ -53,8 +53,15 @@ while running:
 
         # draw the data on the world
         if sensor_data:
+            # remove points detected earlier
+            world.point_cloud = []
+
+            # save the new readings
             world.save_reading(readings=sensor_data)
+
+            # plot the readings
             world.show_reading()
+            
             # Draw the information map on top of the original map
             world.map.blit(world.information_map, (0, 0))
         pygame.display.update()
