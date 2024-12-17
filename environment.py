@@ -122,69 +122,6 @@ class RobotEnvironment:
             self.agents.append(
                 agent
             )
-    
-    def show_agents(self):
-        for agent_pos in self.robot_pos:
-            x, y = agent_pos
-            # draw the robot
-            pygame.draw.circle(
-                surface=self.information_map,
-                color=self.GREY,
-                center=(x, y),
-                radius=self.agent_radius
-            )
-
-    def save_reading(self, readings:List, wasted_rays:List):
-        for reading in readings:
-            # convert the LIDAR reading into cartesian point data
-            point = RobotEnvironment.LIDAR_to_points(reading[0], reading[1], reading[2])
-
-            # check if the point is already stored, if not add it to the store
-            if point not in self.point_cloud: self.point_cloud.append([point, reading[2]])
-        
-        for ray in wasted_rays:
-            # convert the LIDAR ray into cartesina point data
-            point = RobotEnvironment.LIDAR_to_points(ray[0], ray[1], ray[2])
-
-            # check if the point is already stored, if not add it to the store
-            if point not in self.ray_cloud: self.ray_cloud.append([point, ray[2]])
-
-    def show_reading(self, ray_color:Tuple[float, float, float]):
-        # copy the real map
-        self.information_map = self.map.copy()
-
-        # loop through the point cloud
-        # show the point and also trace the ray
-        for line in self.point_cloud:
-            end_point = line[0]
-            start_point = line[1]
-            pygame.draw.line(
-                surface=self.information_map,
-                color=ray_color,
-                end_pos=end_point,
-                start_pos=start_point
-            )
-            pygame.draw.circle(
-                surface=self.information_map,
-                color=self.RED,
-                center=(int(end_point[0]), int(end_point[1])),
-                radius=1
-            )
-        
-        # loop through the wasted rays and plot them
-        for line in self.ray_cloud:
-            end_point = line[0]
-            start_point = line[1]
-            pygame.draw.line(
-                surface=self.information_map,
-                color=ray_color,
-                end_pos=end_point,
-                start_pos=start_point
-            )
-
-    def show_world(self, ray_color: Tuple[float, float, float]):
-        self.show_reading(ray_color)
-        self.show_agents()
 
     def move_agent(self, agent_idx:int, direction:str):
         # select the agent
