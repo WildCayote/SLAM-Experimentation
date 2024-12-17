@@ -96,9 +96,6 @@ class RobotAgent:
             center=self.agent_position,
             radius=self.radius
         )
-
-    def check_collision(self, distance:float):
-        ...
     
     def move(self, direction:str):
         # keep the new position in memory
