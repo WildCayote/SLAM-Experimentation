@@ -41,7 +41,7 @@ class RobotAgent:
             # check if the point is already stored, if not add it to the store
             if point not in self.ray_cloud: self.ray_cloud.append([point, ray[2]])
 
-    def detect_obstacle(self):
+    def detect_obstacle(self, save:bool=True):
         # reset the lists for detection
         self.point_cloud = []
         self.ray_cloud = []
@@ -50,11 +50,15 @@ class RobotAgent:
         data, wasted_rays, _ = self.sensor.detect_obstacles()
 
         # add them to list containing data
-        self.__save_readings(
-            readings=data,
-            wasted_rays=wasted_rays
-        )      
-    
+        if save:
+            self.__save_readings(
+                readings=data,
+                wasted_rays=wasted_rays
+            )      
+
+        else:
+            return data, wasted_rays
+
     def draw_agent(self, surface: pygame.Surface):
         # loop through the point cloud
         # show the point and also trace the ray
@@ -92,19 +96,41 @@ class RobotAgent:
             center=self.agent_position,
             radius=self.radius
         )
+
+    def check_collision(self, distance:float):
+        ...
     
     def move(self, direction:str):
+        # keep the new position in memory
         if direction == 'UP':
-            self.agent_position = (self.agent_position[0], self.agent_position[1] - self.movement_speed)
+            new_position = (self.agent_position[0], self.agent_position[1] - self.movement_speed)
         
         if direction == 'DOWN':
-            self.agent_position = (self.agent_position[0], self.agent_position[1] + self.movement_speed)
+            new_position = (self.agent_position[0], self.agent_position[1] + self.movement_speed)
         
         if direction == 'LEFT':
-            self.agent_position = (self.agent_position[0] - self.movement_speed, self.agent_position[1])
+            new_position = (self.agent_position[0] - self.movement_speed, self.agent_position[1])
 
         if direction == 'RIGHT':
-            self.agent_position = (self.agent_position[0] + self.movement_speed, self.agent_position[1])
+            new_position = (self.agent_position[0] + self.movement_speed, self.agent_position[1])
 
-        # also update the position of the lidar
-        self.sensor.position = self.agent_position
+        # update the lidar
+        self.sensor.position = new_position
+        detections, _ = self.detect_obstacle(save=False) 
+
+        # check for collision using the new lidar position
+        collision = False
+        for detection in detections:
+            distance = detection[0]
+
+            if 10 <= distance <= 23:
+                collision = True
+                break
+        
+        if collision:
+            # return the detector to its position
+            self.sensor.position = self.agent_position
+        
+        else:
+            # move the agent to the new position
+            self.agent_position = new_position
