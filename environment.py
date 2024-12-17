@@ -1,11 +1,11 @@
 from typing import Tuple, List
-import pygame, math, random
+import pygame, math, random, copy
 
 from agent import RobotAgent
 from sensor import LIDAR
 
 class RobotEnvironment:
-    def __init__(self, dimensions:Tuple[int, int], world_path:str, world_name:str = 'SLAM Simulation', agent_radius:float = 50):
+    def __init__(self, dimensions:Tuple[int, int], world_path:str, world_name:str = 'SLAM Simulation', agent_radius:float = 30):
         # create instance variables for the parameters
         self.world_name = world_name
         self.map_height, self.map_width = dimensions
@@ -25,7 +25,9 @@ class RobotEnvironment:
         self.ray_cloud = []
 
         # declare a list for holding the current robot positions
+        # declare a list for holding agents
         self.robot_pos = []
+        self.agents = []
 
         pygame.init()
         
@@ -94,10 +96,32 @@ class RobotEnvironment:
             explored.append((candidate_x, candidate_y))
 
     def create_agents(self, num_agents:int = 1):
-        for agent in range(num_agents):
+        for _ in range(num_agents):
             # select a spawn point
             x, y = self.select_spawn_point(agent_radius=self.agent_radius)
             self.robot_pos.append((x, y))
+
+            # instantiate the agent and its respective lidar
+            agent_sensor = LIDAR(
+                rotation_speed=300,
+                detection_range=90,
+                map=self.map,
+                error=(0.01, 0.01),
+                ray_color=self.GREEN
+            )
+            agent_sensor.position = (x, y)
+            agent = RobotAgent(
+                spawn_point=(x, y),
+                radius=self.agent_radius,
+                color=self.GREY,
+                lidar_sensor=agent_sensor,
+                movement_speed=20
+            )
+
+            # add the agent to the agent tracking list
+            self.agents.append(
+                agent
+            )
     
     def show_agents(self):
         for agent_pos in self.robot_pos:
@@ -168,4 +192,3 @@ if __name__ == '__main__':
         dimensions=(500, 500),
         world_path='./maps/map-1.png'
     )
-
