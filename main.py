@@ -7,7 +7,8 @@ from sensor import LIDAR
 # create a world
 world = RobotEnvironment(
     dimensions=(800, 900),
-    world_path='./maps/map-1.png'
+    world_path='./maps/map-1.png',
+    agent_radius=20
 )
 
 # create an agent
@@ -36,30 +37,30 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                world.move_agent(
-                    agent_idx=agent_index,
-                    direction='UP'
-                )
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_UP]:
+        world.move_agent(
+            agent_idx=agent_index,
+            direction='UP'
+        )
 
-            if event.key == pygame.K_DOWN:
-                world.move_agent(
-                    agent_idx=agent_index,
-                    direction='DOWN'
-                )
+    if keys[pygame.K_DOWN]:
+        world.move_agent(
+            agent_idx=agent_index,
+            direction='DOWN'
+        )
             
-            if event.key == pygame.K_RIGHT:
-                world.move_agent(
-                    agent_idx=agent_index,
-                    direction='RIGHT'
-                )
+    if keys[pygame.K_RIGHT]:
+        world.move_agent(
+            agent_idx=agent_index,
+            direction='RIGHT'
+        )
 
-            if event.key == pygame.K_LEFT:
-                world.move_agent(
-                    agent_idx=agent_index,
-                    direction='LEFT'
-                )
+    if keys[pygame.K_LEFT]:
+        world.move_agent(
+            agent_idx=agent_index,
+            direction='LEFT'
+        )
 
     world.update()
 

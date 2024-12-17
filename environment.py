@@ -115,7 +115,7 @@ class RobotEnvironment:
                 radius=self.agent_radius,
                 color=self.GREY,
                 lidar_sensor=agent_sensor,
-                movement_speed=20
+                movement_speed=5
             )
 
             # add the agent to the agent tracking list
