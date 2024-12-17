@@ -16,9 +16,6 @@ world.create_agents(num_agents=1)
 # create a variable that indicates which agent to control
 agent_index = 0
 
-# copy the real world/map
-original_map = world.map.copy()
-
 # copy the newly created map, the one filled with black, as the information map
 world.information_map = world.map.copy()
 
