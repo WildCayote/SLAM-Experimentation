@@ -42,12 +42,7 @@ class RobotEnvironment:
 
         # overlay the map of the world on to the window
         self.map.blit(self.world_map, (0,0))
-        
-    def load_map(self):
-        result = pygame.image.load(self.world_path)
-        result = pygame.transform.scale(surface=result, size=(self.map_width, self.map_height))
-        return result
-
+    
     @staticmethod
     def LIDAR_to_points(distance:float, angle:float, LIDAR_pos:Tuple[float, float]):
         x = int(LIDAR_pos[0] + math.cos(angle) * distance)
@@ -55,6 +50,11 @@ class RobotEnvironment:
 
         return (x, y)
 
+    def load_map(self):
+        result = pygame.image.load(self.world_path)
+        result = pygame.transform.scale(surface=result, size=(self.map_width, self.map_height))
+        return result
+    
     def select_random_point(self):
         rand_x = random.randint(a=0, b=self.map_width)
         rand_y = random.randint(a=0, b=self.map_height)
@@ -185,6 +185,13 @@ class RobotEnvironment:
     def show_world(self, ray_color: Tuple[float, float, float]):
         self.show_reading(ray_color)
         self.show_agents()
+
+    def update(self):
+        # copy the real map
+        self.information_map = self.map.copy()
+        for agent in self.agents:
+            agent.detect_obstacle()
+            agent.draw_agent(surface=self.information_map)
 
 if __name__ == '__main__':
     # create a world

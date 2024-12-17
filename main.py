@@ -54,17 +54,19 @@ while running:
         sensor.position = cursor_position
 
         # sense the obstacles
-        data, wasted_rays, sensor_color = sensor.detect_obstacles()
+        # data, wasted_rays, sensor_color = sensor.detect_obstacles()
 
-        # remove points detected earlier
-        world.point_cloud = []
-        world.ray_cloud = []
+        # # remove points detected earlier
+        # world.point_cloud = []
+        # world.ray_cloud = []
 
-        # save the new readings
-        world.save_reading(readings=data, wasted_rays=wasted_rays)
+        # # save the new readings
+        # world.save_reading(readings=data, wasted_rays=wasted_rays)
 
-        # plot the readings
-        world.show_world(ray_color=sensor_color)
+        # # plot the readings
+        # world.show_world(ray_color=sensor_color)
+
+        world.update()
 
         # Draw the information map on top of the original map
         world.map.blit(world.information_map, (0, 0))
