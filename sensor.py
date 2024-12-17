@@ -3,11 +3,12 @@ import numpy as np
 import pygame, math
 
 class LIDAR:
-    def __init__(self, rotation_speed:float, detection_range:float, map:pygame.Surface, error: Tuple[float, float]):
+    def __init__(self, rotation_speed:float, detection_range:float, map:pygame.Surface, error: Tuple[float, float], ray_color:Tuple[float, float, float]):
         # create instance variables for the parameters
         self.rotation_speed = rotation_speed
         self.range = detection_range
-        self.map = map 
+        self.map = map
+        self.ray_color = ray_color
         self.error = error
 
         # define the position of the sensor in the world
@@ -45,6 +46,8 @@ class LIDAR:
 
     def detect_obstacles(self):
         data = []
+        lines = []
+        detected_angles = []
         x1, y1 = self.position
 
         # rotate once and obtain 60 samples, from 0Deg (0rad) to 360Deg (2πrad)
@@ -82,10 +85,18 @@ class LIDAR:
                         # store current angle reading to the data
                         data.append(readings)
 
+                        # mark the angle as being detected
+                        detected_angles.append(angle)
+
                         # break the sampling along the line since LIDAR reads the closest object and nothing further along a given line
                         break
-        
-        # now return the data read, if no obhect is detected the return False
-        if len(data) > 0: return data
-        else: return False
+            
+            # add the remaining rays that didn't hit a wall
+            if angle not in detected_angles:
+                line_description = [self.range, angle, self.position]
+                lines.append(line_description)  
+                
+        # now return the data read
+        return data, lines, self.ray_color
                         
+

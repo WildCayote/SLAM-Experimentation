@@ -13,16 +13,17 @@ world = RobotEnvironment(
 # copy the real world/map
 original_map = world.map.copy()
 
+# copy the newly created map, the one filled with black, as the information map
+world.information_map = world.map.copy()
+
 # initialize the LIDAR
 sensor = LIDAR(
     rotation_speed=300,
     detection_range=90,
     map=original_map,
-    error=(0.5, 0.01)
+    error=(0.01, 0.01),
+    ray_color=world.GREEN
 )
-
-# copy the newly created map, the one filled with black, as the information map
-world.information_map = world.map.copy()
 
 # setup pygame
 running = True
@@ -53,14 +54,18 @@ while running:
 
         # draw the data on the world
         if sensor_data:
+            # unpack the reading
+            data, wasted_rays, sensor_color = sensor_data
+
             # remove points detected earlier
             world.point_cloud = []
+            world.ray_cloud = []
 
             # save the new readings
-            world.save_reading(readings=sensor_data)
+            world.save_reading(readings=data, wasted_rays=wasted_rays)
 
             # plot the readings
-            world.show_reading()
+            world.show_reading(ray_color=sensor_color)
 
             # Draw the information map on top of the original map
             world.map.blit(world.information_map, (0, 0))
