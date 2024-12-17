@@ -186,6 +186,13 @@ class RobotEnvironment:
         self.show_reading(ray_color)
         self.show_agents()
 
+    def move_agent(self, agent_idx:int, direction:str):
+        # select the agent
+        agent = self.agents[0]
+        
+        # make it move
+        agent.move(direction=direction)
+
     def update(self):
         # copy the real map
         self.information_map = self.map.copy()

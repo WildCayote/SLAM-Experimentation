@@ -92,3 +92,19 @@ class RobotAgent:
             center=self.agent_position,
             radius=self.radius
         )
+    
+    def move(self, direction:str):
+        if direction == 'UP':
+            self.agent_position = (self.agent_position[0], self.agent_position[1] - self.movement_speed)
+        
+        if direction == 'DOWN':
+            self.agent_position = (self.agent_position[0], self.agent_position[1] + self.movement_speed)
+        
+        if direction == 'LEFT':
+            self.agent_position = (self.agent_position[0] - self.movement_speed, self.agent_position[1])
+
+        if direction == 'RIGHT':
+            self.agent_position = (self.agent_position[0] + self.movement_speed, self.agent_position[1])
+
+        # also update the position of the lidar
+        self.sensor.position = self.agent_position

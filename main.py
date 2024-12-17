@@ -13,20 +13,14 @@ world = RobotEnvironment(
 # create an agent
 world.create_agents(num_agents=1)
 
+# create a variable that indicates which agent to control
+agent_index = 0
+
 # copy the real world/map
 original_map = world.map.copy()
 
 # copy the newly created map, the one filled with black, as the information map
 world.information_map = world.map.copy()
-
-# initialize the LIDAR
-sensor = LIDAR(
-    rotation_speed=300,
-    detection_range=90,
-    map=original_map,
-    error=(0.01, 0.01),
-    ray_color=world.GREEN
-)
 
 # setup pygame
 running = True
@@ -41,33 +35,34 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        # check if the cursor is on the map
-        if pygame.mouse.get_focused():
-            sensor_on = True
-        elif not pygame.mouse.get_focused():
-            sensor_on = False
-    
-    # if the cursor is on focus, on the map
-    if sensor_on:
-        # get the position of the cursor and set it as the position for the LIDAR
-        cursor_position = pygame.mouse.get_pos()
-        sensor.position = cursor_position
+        
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                world.move_agent(
+                    agent_idx=agent_index,
+                    direction='UP'
+                )
 
-        # sense the obstacles
-        # data, wasted_rays, sensor_color = sensor.detect_obstacles()
+            if event.key == pygame.K_DOWN:
+                world.move_agent(
+                    agent_idx=agent_index,
+                    direction='DOWN'
+                )
+            
+            if event.key == pygame.K_RIGHT:
+                world.move_agent(
+                    agent_idx=agent_index,
+                    direction='RIGHT'
+                )
 
-        # # remove points detected earlier
-        # world.point_cloud = []
-        # world.ray_cloud = []
+            if event.key == pygame.K_LEFT:
+                world.move_agent(
+                    agent_idx=agent_index,
+                    direction='LEFT'
+                )
 
-        # # save the new readings
-        # world.save_reading(readings=data, wasted_rays=wasted_rays)
+    world.update()
 
-        # # plot the readings
-        # world.show_world(ray_color=sensor_color)
-
-        world.update()
-
-        # Draw the information map on top of the original map
-        world.map.blit(world.information_map, (0, 0))
-        pygame.display.update()
+    # Draw the information map on top of the original map
+    world.map.blit(world.information_map, (0, 0))
+    pygame.display.update()
