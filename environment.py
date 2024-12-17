@@ -1,6 +1,8 @@
 from typing import Tuple, List
 import pygame, math
 
+from agent import RobotAgent
+
 class RobotEnvironment:
     def __init__(self, dimensions:Tuple[int, int], world_path:str, world_name:str = 'SLAM Simulation'):
         # create instance variables for the parameters
