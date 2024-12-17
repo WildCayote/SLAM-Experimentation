@@ -10,6 +10,9 @@ world = RobotEnvironment(
     world_path='./maps/map-1.png'
 )
 
+# create an agent
+world.create_agents(num_agents=1)
+
 # copy the real world/map
 original_map = world.map.copy()
 
@@ -30,7 +33,8 @@ running = True
 
 while running:
     # fill the original map with black
-    world.map.fill(color=world.BLACK)
+    image = world.load_map()
+    world.map.blit(image, (0,0))
 
     # poll for event
     # pygame.QUIT event means the user clicked X to close your window
@@ -50,23 +54,18 @@ while running:
         sensor.position = cursor_position
 
         # sense the obstacles
-        sensor_data = sensor.detect_obstacles()
+        data, wasted_rays, sensor_color = sensor.detect_obstacles()
 
-        # draw the data on the world
-        if sensor_data:
-            # unpack the reading
-            data, wasted_rays, sensor_color = sensor_data
+        # remove points detected earlier
+        world.point_cloud = []
+        world.ray_cloud = []
 
-            # remove points detected earlier
-            world.point_cloud = []
-            world.ray_cloud = []
+        # save the new readings
+        world.save_reading(readings=data, wasted_rays=wasted_rays)
 
-            # save the new readings
-            world.save_reading(readings=data, wasted_rays=wasted_rays)
+        # plot the readings
+        world.show_world(ray_color=sensor_color)
 
-            # plot the readings
-            world.show_reading(ray_color=sensor_color)
-
-            # Draw the information map on top of the original map
-            world.map.blit(world.information_map, (0, 0))
+        # Draw the information map on top of the original map
+        world.map.blit(world.information_map, (0, 0))
         pygame.display.update()
