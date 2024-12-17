@@ -1,7 +1,6 @@
 import pygame
 
 from environment import RobotEnvironment
-from sensor import LIDAR
 
 
 # create a world
