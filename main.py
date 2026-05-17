@@ -1,6 +1,8 @@
 import pygame
-
+import numpy as np
 from environment import RobotEnvironment
+from agent import RobotAgent
+from slam import EKFSlAM
 
 
 # create a world
@@ -12,6 +14,19 @@ world = RobotEnvironment(
 
 # create an agent
 world.create_agents(num_agents=1)
+
+# initiale state of the robot (x, y, theta)
+initial_state = np.array([0, 0, 0], dtype=float)
+
+# initiale covariance of the state estimation
+initial_covariance = np.eye(3)
+
+# create a SLAM instance
+slam = EKFSlAM(
+    initial_state=initial_state,
+    initial_covariance=initial_covariance
+)
+
 
 # create a variable that indicates which agent to control
 agent_index = 0
@@ -32,7 +47,10 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        
+    
+    # previous pose of the bot
+    previous_pose = world.agents[agent_index].agent_position, world.agents[agent_index].theta
+
     keys = pygame.key.get_pressed()
     # Movement model: UP/DOWN = forward/backward, LEFT/RIGHT = rotate
     if keys[pygame.K_UP]:
@@ -58,6 +76,41 @@ while running:
             agent_idx=agent_index,
             direction='LEFT'
         )
+
+    # --- SLAM steps ---
+    # 1. Compute control input (how much the agent moved/rotated)
+    current_pose = world.agents[agent_index].agent_position, world.agents[agent_index].theta
+    control_input = np.array([
+        current_pose[0][0] - previous_pose[0][0],  # delta x
+        current_pose[0][1] - previous_pose[0][1],  # delta y
+        current_pose[1] - previous_pose[1]          # delta theta
+    ])
+
+    if not np.all(control_input == 0):
+        print(f"Control input: {control_input}")
+
+    # 2. Call slam.state_predict(control_input, motion_model)
+    state_predict = slam.state_predict(control_input=control_input)
+
+
+    # 3. Get LIDAR data
+    lidar_data = world.agents[agent_index].detections
+    points = []
+    for reading in lidar_data:
+        point = RobotAgent.LIDAR_to_points(reading[0], reading[1], reading[2])
+        points.append(point)
+
+    # 4. extract lines
+    lines = EKFSlAM.landmark_detection(points=points)
+    if len(lines) > 0:
+        print(f"Detected lines: {lines}")
+    
+    # 5. associate
+
+
+    
+    # 6. call slam.update(...)
+ 
 
     world.update()
 

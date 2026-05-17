@@ -15,6 +15,9 @@ class RobotAgent:
         self.ray_cloud = []
         self.ray_color = self.sensor.ray_color
 
+        # the detection data at each time step, will be overritten at each time step, but can be used for debugging
+        self.detections = []
+
         # orientation (theta) in radians, facing right (0 rad)
         self.theta = 0.0
 
@@ -31,6 +34,7 @@ class RobotAgent:
         return (x, y)
     
     def __save_readings(self, readings:List, wasted_rays:List):
+        self.detections = readings
         for reading in readings:
             # convert the LIDAR reading into cartesian point data
             point = RobotAgent.LIDAR_to_points(reading[0], reading[1], reading[2])
