@@ -34,6 +34,7 @@ while running:
             running = False
         
     keys = pygame.key.get_pressed()
+    # Movement model: UP/DOWN = forward/backward, LEFT/RIGHT = rotate
     if keys[pygame.K_UP]:
         world.move_agent(
             agent_idx=agent_index,

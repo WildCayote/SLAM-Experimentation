@@ -15,9 +15,13 @@ class RobotAgent:
         self.ray_cloud = []
         self.ray_color = self.sensor.ray_color
 
+        # orientation (theta) in radians, facing right (0 rad)
+        self.theta = 0.0
+
         # define colors to be used
         self.RED = (255, 0, 0)
         self.GREY = (70, 70, 70)
+        self.BLACK = (0, 0, 0)
    
     @staticmethod
     def LIDAR_to_points(distance:float, angle:float, LIDAR_pos:Tuple[float, float]):
@@ -93,41 +97,72 @@ class RobotAgent:
         pygame.draw.circle(
             surface=surface,
             color=self.GREY,
-            center=self.agent_position,
+            center=(int(self.agent_position[0]), int(self.agent_position[1])),
             radius=self.radius
+        )
+
+        # draw orientation arrow (small black arrow from center in direction of theta)
+        arrow_length = self.radius + 10
+        x, y = self.agent_position
+        end_x = int(x + arrow_length * math.cos(self.theta))
+        end_y = int(y + arrow_length * math.sin(self.theta))
+        pygame.draw.line(
+            surface=surface,
+            color=self.BLACK,
+            start_pos=(int(x), int(y)),
+            end_pos=(end_x, end_y),
+            width=3
         )
     
     def move(self, direction:str):
-        # keep the new position in memory
+        # Movement model: UP/DOWN = forward/backward, LEFT/RIGHT = rotate
+        x, y = self.agent_position
+        theta = self.theta
+        delta_theta = math.radians(5)  # rotation step in radians
+        new_theta = theta
+        new_position = (x, y)
+
         if direction == 'UP':
-            new_position = (self.agent_position[0], self.agent_position[1] - self.movement_speed)
-        
-        if direction == 'DOWN':
-            new_position = (self.agent_position[0], self.agent_position[1] + self.movement_speed)
-        
-        if direction == 'LEFT':
-            new_position = (self.agent_position[0] - self.movement_speed, self.agent_position[1])
+            # move forward in direction of theta
+            new_position = (
+                x + self.movement_speed * math.cos(theta),
+                y + self.movement_speed * math.sin(theta)
+            )
+        elif direction == 'DOWN':
+            # move backward
+            new_position = (
+                x - self.movement_speed * math.cos(theta),
+                y - self.movement_speed * math.sin(theta)
+            )
+        elif direction == 'LEFT':
+            # rotate counterclockwise
+            new_theta = (theta - delta_theta) % (2 * math.pi)
+        elif direction == 'RIGHT':
+            # rotate clockwise
+            new_theta = (theta + delta_theta) % (2 * math.pi)
 
-        if direction == 'RIGHT':
-            new_position = (self.agent_position[0] + self.movement_speed, self.agent_position[1])
+        # If rotation, don't move position, just update theta
+        if direction in ['LEFT', 'RIGHT']:
+            self.theta = new_theta
+            # LIDAR orientation is not affected unless you want to simulate a rotating sensor
+            return
 
-        # update the lidar
+        # update the lidar position for collision check
         self.sensor.position = new_position
-        detections, _ = self.detect_obstacle(save=False) 
+        detections, _ = self.detect_obstacle(save=False)
 
         # check for collision using the new lidar position
         collision = False
         for detection in detections:
             distance = detection[0]
-
             if 10 <= distance <= 23:
                 collision = True
                 break
-        
+
         if collision:
             # return the detector to its position
             self.sensor.position = self.agent_position
-        
         else:
             # move the agent to the new position
             self.agent_position = new_position
+            self.sensor.position = new_position
