@@ -120,10 +120,7 @@ while running:
         associated_landmark_idx = EKFSlAM.associate_line(detected_line=line, landmarks=slam.landmarks)
         if associated_landmark_idx is not None:
             print(f"Line {line} associated with landmark {associated_landmark_idx}")
-                
-            # 6. call slam.update(...)
-            slam.update_landmark(associated_landmark_idx, line)
-
+            slam.update(associated_landmark_idx, line)
         else:
             print(f"Line {line} is a new landmark")
             new_landmarks.append(line)
