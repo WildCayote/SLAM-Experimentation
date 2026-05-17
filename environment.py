@@ -37,11 +37,24 @@ class RobotEnvironment:
         # display the window name
         pygame.display.set_caption(self.world_name)
 
+        # world canvas used by the simulation logic and sensors
+        self.map = pygame.Surface((self.map_width, self.map_height))
+        self.map.blit(self.world_map, (0, 0))
+
         # now obtain the window/world created by pygame
-        self.map = pygame.display.set_mode((self.map_width, self.map_height))
+        self.display = pygame.display.set_mode((self.map_width * 2, self.map_height))
+
+        # split the display into a world pane and a visualization pane
+        self.world_view_rect = pygame.Rect(0, 0, self.map_width, self.map_height)
+        self.viz_view_rect = pygame.Rect(self.map_width, 0, self.map_width, self.map_height)
+
+        # optional helper surfaces that can be reused for the side pane
+        self.world_view = pygame.Surface((self.map_width, self.map_height))
+        self.viz_view = pygame.Surface((self.map_width, self.map_height))
 
         # overlay the map of the world on to the window
-        self.map.blit(self.world_map, (0,0))
+        self.world_view.blit(self.world_map, (0, 0))
+        self.display.blit(self.world_view, self.world_view_rect)
     
     @staticmethod
     def LIDAR_to_points(distance:float, angle:float, LIDAR_pos:Tuple[float, float]):
@@ -56,8 +69,8 @@ class RobotEnvironment:
         return result
     
     def select_random_point(self):
-        rand_x = random.randint(a=0, b=self.map_width)
-        rand_y = random.randint(a=0, b=self.map_height)
+        rand_x = random.randrange(0, self.map_width)
+        rand_y = random.randrange(0, self.map_height)
         return rand_x, rand_y
     
     def validate_spawn_point(self, x:float, y:float, agent_size:float):

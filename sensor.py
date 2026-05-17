@@ -16,8 +16,8 @@ class LIDAR:
         # this will later be attached to a robot's position using the sensor
         self.position = (0, 0) 
 
-        # obtain the width and height of the world being displayed in pygame
-        self.map_width, self.map_height = pygame.display.get_surface().get_size()
+        # obtain the width and height of the actual map surface, not the split display
+        self.map_width, self.map_height = self.map.get_size()
         
         # a list for holding sensed obstacles
         self.obstacles = []

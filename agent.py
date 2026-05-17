@@ -117,6 +117,27 @@ class RobotAgent:
             end_pos=(end_x, end_y),
             width=3
         )
+
+    def draw_pose(self, surface: pygame.Surface):
+        """Draw only the robot body and orientation arrow."""
+        pygame.draw.circle(
+            surface=surface,
+            color=self.GREY,
+            center=(int(self.agent_position[0]), int(self.agent_position[1])),
+            radius=self.radius
+        )
+
+        arrow_length = self.radius + 10
+        x, y = self.agent_position
+        end_x = int(x + arrow_length * math.cos(self.theta))
+        end_y = int(y + arrow_length * math.sin(self.theta))
+        pygame.draw.line(
+            surface=surface,
+            color=self.BLACK,
+            start_pos=(int(x), int(y)),
+            end_pos=(end_x, end_y),
+            width=3
+        )
     
     def move(self, direction:str):
         # Movement model: UP/DOWN = forward/backward, LEFT/RIGHT = rotate

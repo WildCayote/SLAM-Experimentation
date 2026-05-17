@@ -8,12 +8,36 @@ class EKFSlAM:
         self.landmarks = []
     
     @staticmethod
+    def line_segment_from_inliers(inlier_points, line):
+        if len(inlier_points) < 2:
+            return None
+
+        a, b = line
+        direction = np.array([1.0, a], dtype=float)
+        direction_norm = np.linalg.norm(direction)
+        if direction_norm == 0:
+            return None
+
+        direction = direction / direction_norm
+        base_point = np.array([0.0, b], dtype=float)
+        base_projection = base_point @ direction
+
+        projections = np.asarray(inlier_points, dtype=float) @ direction
+        min_offset = projections.min() - base_projection
+        max_offset = projections.max() - base_projection
+
+        p1 = base_point + min_offset * direction
+        p2 = base_point + max_offset * direction
+        return tuple(p1), tuple(p2)
+
+    @staticmethod
     def landmark_detection(points: list, min_samples=2, residual_threshold=2.0, min_inliers=10, max_trials=25):
         points = np.array(points)
         if len(points) > 200:
             points = points[::2]
 
         lines = []
+        segments = []
         while len(points) > min_inliers:
             X = points[:, 0].reshape(-1, 1)
             y = points[:, 1]
@@ -32,9 +56,15 @@ class EKFSlAM:
             a = model.estimator_.coef_[0]
             b = model.estimator_.intercept_
             lines.append((a, b))
+
+            inlier_points = points[inlier_mask]
+            segment = EKFSlAM.line_segment_from_inliers(inlier_points, (a, b))
+            if segment is not None:
+                segments.append(segment)
+
             # Remove inliers and repeat
             points = points[~inlier_mask]
-        return lines 
+        return lines, segments
 
     @staticmethod
     def associate_line(detected_line, landmarks, angle_threshold=np.deg2rad(10), rho_threshold=25.0):
