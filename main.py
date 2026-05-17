@@ -112,13 +112,22 @@ while running:
         lines = EKFSlAM.landmark_detection(points=points)
         if len(lines) > 0:
             print(f"Detected {len(lines)} lines")
+            print(f"Lines: {lines}")
     
     # 5. associate
+    new_landmarks = []
+    for line in lines:
+        associated_landmark_idx = EKFSlAM.associate_line(detected_line=line, landmarks=slam.landmarks)
+        if associated_landmark_idx is not None:
+            print(f"Line {line} associated with landmark {associated_landmark_idx}")
+        else:
+            print(f"Line {line} is a new landmark")
+            new_landmarks.append(line)
 
-
+    # add the new landmarks to the slam instance
+    slam.landmarks.extend(new_landmarks)
     
     # 6. call slam.update(...)
- 
 
     world.update()
 
