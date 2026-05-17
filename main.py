@@ -43,6 +43,8 @@ def normalize_segment(segment):
 
 
 def append_segment(existing_segment, new_segment):
+    max_length = 120.0
+
     if new_segment is None:
         return existing_segment
     if existing_segment is None:
@@ -65,6 +67,16 @@ def append_segment(existing_segment, new_segment):
 
     merged_start = points[min_index]
     merged_end = points[max_index]
+
+    merged_direction = merged_end - merged_start
+    merged_length = np.linalg.norm(merged_direction)
+    if merged_length > max_length and merged_length > 1e-8:
+        merged_direction = merged_direction / merged_length
+        midpoint = (merged_start + merged_end) / 2.0
+        half_length = max_length / 2.0
+        merged_start = midpoint - half_length * merged_direction
+        merged_end = midpoint + half_length * merged_direction
+
     return merged_start, merged_end
 
 

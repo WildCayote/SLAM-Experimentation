@@ -8,7 +8,7 @@ class EKFSlAM:
         self.landmarks = []
     
     @staticmethod
-    def line_segment_from_inliers(inlier_points, line):
+    def line_segment_from_inliers(inlier_points, line, max_length=120.0):
         if len(inlier_points) < 2:
             return None
 
@@ -23,11 +23,22 @@ class EKFSlAM:
         base_projection = base_point @ direction
 
         projections = np.asarray(inlier_points, dtype=float) @ direction
-        min_offset = projections.min() - base_projection
-        max_offset = projections.max() - base_projection
 
-        p1 = base_point + min_offset * direction
-        p2 = base_point + max_offset * direction
+        # use robust endpoints so one stray inlier does not create a huge wall
+        low_projection = np.percentile(projections, 15)
+        high_projection = np.percentile(projections, 85)
+
+        if high_projection <= low_projection:
+            return None
+
+        center_offset = (low_projection + high_projection) / 2.0 - base_projection
+        half_length = min((high_projection - low_projection) / 2.0, max_length / 2.0)
+        if half_length <= 0:
+            return None
+
+        midpoint = base_point + center_offset * direction
+        p1 = midpoint - half_length * direction
+        p2 = midpoint + half_length * direction
         return tuple(p1), tuple(p2)
 
     @staticmethod
@@ -67,7 +78,7 @@ class EKFSlAM:
         return lines, segments
 
     @staticmethod
-    def associate_line(detected_line, landmarks, angle_threshold=np.deg2rad(10), rho_threshold=25.0):
+    def associate_line(detected_line, landmarks, angle_threshold=np.deg2rad(3.0), rho_threshold=8.0):
         if detected_line is None or len(detected_line) != 2:
             return None
 
