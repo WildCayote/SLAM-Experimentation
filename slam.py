@@ -6,13 +6,22 @@ class EKFSlAM:
         self.state = initial_state
         self.covariance = initial_covariance
     
-    def landmark_detection(points: list, min_samples=2, residual_threshold=2.0, min_inliers=10):
+    def landmark_detection(points: list, min_samples=2, residual_threshold=2.0, min_inliers=10, max_trials=25):
         points = np.array(points)
+        if len(points) > 200:
+            points = points[::2]
+
         lines = []
         while len(points) > min_inliers:
             X = points[:, 0].reshape(-1, 1)
             y = points[:, 1]
-            model = RANSACRegressor(min_samples=min_samples, residual_threshold=residual_threshold)
+            model = RANSACRegressor(
+                min_samples=min_samples,
+                residual_threshold=residual_threshold,
+                max_trials=max_trials,
+                stop_probability=0.95,
+                random_state=0
+            )
             model.fit(X, y)
             inlier_mask = model.inlier_mask_
             if np.sum(inlier_mask) < min_inliers:

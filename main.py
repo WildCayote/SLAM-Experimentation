@@ -27,6 +27,10 @@ slam = EKFSlAM(
     initial_covariance=initial_covariance
 )
 
+# run the heavier line extraction every few frames instead of every loop
+frame_index = 0
+line_detection_interval = 5
+
 
 # create a variable that indicates which agent to control
 agent_index = 0
@@ -38,8 +42,10 @@ world.information_map = world.map.copy()
 running = True
 
 while running:
+    frame_index += 1
+
     # fill the original map with black
-    image = world.load_map()
+    image = world.world_map
     world.map.blit(image, (0,0))
 
     # poll for event
@@ -100,10 +106,12 @@ while running:
         point = RobotAgent.LIDAR_to_points(reading[0], reading[1], reading[2])
         points.append(point)
 
-    # 4. extract lines
-    lines = EKFSlAM.landmark_detection(points=points)
-    if len(lines) > 0:
-        print(f"Detected lines: {lines}")
+    # 4. extract lines less frequently to keep the frame loop responsive
+    lines = []
+    if frame_index % line_detection_interval == 0:
+        lines = EKFSlAM.landmark_detection(points=points)
+        if len(lines) > 0:
+            print(f"Detected {len(lines)} lines")
     
     # 5. associate
 

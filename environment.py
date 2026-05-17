@@ -66,7 +66,7 @@ class RobotEnvironment:
         clearance = 10
         safe_zone = agent_size + clearance
         detector = LIDAR(
-            rotation_speed=100,
+            rotation_speed=60,
             detection_range=safe_zone,
             map=self.map.copy(),
             error=(0.0,0.0),
@@ -103,7 +103,7 @@ class RobotEnvironment:
 
             # instantiate the agent and its respective lidar
             agent_sensor = LIDAR(
-                rotation_speed=300,
+                rotation_speed=120,
                 detection_range=90,
                 map=self.map,
                 error=(0.01, 0.01),
