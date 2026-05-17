@@ -105,15 +105,67 @@ class EKFSlAM:
 
         return best_index
 
-    def measurement_predict(self, measurement_model):
-        ...
-    
+    def add_landmarks(self, new_landmarks, init_cov=None):
+        """
+        Append new landmarks to joint state and expand covariance.
+
+        new_landmarks: iterable of (l0,l1) pairs (shape (m,2) or list of tuples)
+        """
+        if len(new_landmarks) == 0:
+            return
+
+        new_landmarks = np.array(new_landmarks, dtype=float).reshape(-1, 2)
+        m = new_landmarks.shape[0]
+
+        if init_cov is None:
+            init_cov = np.diag([np.deg2rad(15.0)**2, 100.0])
+        init_cov = np.asarray(init_cov, dtype=float)
+        assert init_cov.shape == (2, 2), "init_cov must be a 2x2 matrix"
+        
+        # compute old state length from the canonical joint state
+        old_n = self.state.size
+        P_old = self.covariance
+        assert P_old.shape == (old_n, old_n)
+
+        # extend state vector (robot pose + existing landmarks already in self.state)
+        self.state = np.concatenate([self.state.reshape(-1), new_landmarks.reshape(-1)])
+
+        # expand covariance
+        new_n = old_n + 2 * m
+        P_new = np.zeros((new_n, new_n), dtype=float)
+        P_new[:old_n, :old_n] = P_old
+        for i in range(m):
+            i0 = old_n + 2 * i
+            P_new[i0:i0+2, i0:i0+2] = init_cov
+        self.covariance = P_new
+
+        # keep a derived landmarks array (optional, avoid maintaining twice)
+        self.landmarks = self.state[3:].reshape(-1, 2)
+
     def state_predict(self, control_input):
         self.state[:3] += control_input
         return self.state 
-    
-    def measurement(self):
-        ...
 
-    def update(self, measurement, measurement_model, measurement_noise):
-        ...
+    def update_landmark(self, landmark_idx, measurement, R=None):
+        if R is None:
+            R = np.diag([0.05**2, 10.0**2])
+
+        z = np.asarray(measurement, dtype=float)
+
+        lm_start = 3 + 2 * landmark_idx
+        x_hat = self.state[lm_start:lm_start + 2]
+
+        H = np.zeros((2, self.state.size))
+        H[:, lm_start:lm_start + 2] = np.eye(2)
+
+        if self.covariance.shape[0] != self.state.size:
+            raise ValueError("Covariance shape does not match state size")
+
+        y = z - x_hat
+        S = H @ self.covariance @ H.T + R
+        K = self.covariance @ H.T @ np.linalg.inv(S)
+
+        self.state = self.state + K @ y
+        self.covariance = (np.eye(self.state.size) - K @ H) @ self.covariance
+
+        self.landmarks = self.state[3:].reshape(-1, 2)
